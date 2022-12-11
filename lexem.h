@@ -2,11 +2,11 @@
 #define RGR2_LEXEM_H
 
 #include <cstdio>
-
+#include <string>
 
 enum class LexemType
 {
-    Constant, Var, Push, Pop, Op, Relation, Jmp, Ji, Read, Write, End, Comment, Error, Space, Eof,
+    Constant, Var, Push, Pop, Op, Relation, Jmp, Ji, Read, Write, End, Comment, Error
 };
 enum class OperationType
 {
@@ -18,15 +18,24 @@ enum class RelationType
 };
 class Lexem
 {
-    Lexem(LexemType lexemType_, OperationType operationType_ = OperationType::Undefined, RelationType relationType_ = RelationType::Undefined);
+public:
+    Lexem(LexemType lexemType_, size_t strNum_, const std::string& varName_, int constValue_ = 0,
+          OperationType operationType_ = OperationType::Undefined, RelationType relationType_ = RelationType::Undefined);
     LexemType GetLexemType() const;
     OperationType GetOperationType() const;
     RelationType GetRelationType() const;
+    std::string ToString() const;
+    friend std::ostream& operator<<(std::ostream& os_, const Lexem& lexem_);
+private:
+    std::string getOperationInfo() const;
+    std::string getRelationInfo() const;
 private:
     LexemType m_lexemType;
+    size_t m_stringNumber;
+    std::string m_varName;
+    int m_constValue;
     OperationType m_opType;
     RelationType m_relationType;
-    size_t m_stringNumber;
 };
 
 

@@ -7,40 +7,38 @@
 #include <map>
 #include "lexem.h"
 
-//lf == \n
 static constexpr char g_newLine = '\n';
 class Lexer final
 {
-public:
-    Lexer(const char* filename_);
-    const std::vector<Lexem>& GetLexems();
 private:
     enum State
     {
-        sA1, sA2, sB1, sC1, sD1, sE1, sE2, sE3, sF1, sF2, sF3, sG1, sH1, sI1, sI2, sJ1, sEND,
-        sA1a, sA1b, sA2a, sA2b, sA2c, sA2d, sA2e, sA2f, sB1a, sB1b, sC1a, sC1b, sC1c, sC1d, sC1e,
-        sC1f, sC1g, sC1h, sD1a, sE1a, sE2a, sE2b, sE3a, sG1a, sG1b, sH1a, sH1b, sI1a, sI2a, sI2b,
-        sI2c, sI2d, sM1, sExit1, sExit2, sExit3, sExit4,
-        StateCount
+        sA1, sA2, sB1, sC1, sD1, sE1, sE2, sE3, sF1, sF2, sF3, sG1, sH1, sI1, sI2, sJ1, sEND, sM1, StateCount
     };
+public:
+    using FuncPtr = State (Lexer::*)();
     enum Token
     {
         Letter, Digit, Op, Relation, Space, NewLine, Semicolon, Error, End, TokenCount
     };
     struct FindTable
     {
-        FindTable(char letter, size_t alternative_, State state_)
-        : m_letter(letter), m_alternative(alternative_), m_state(state_) {}
+        FindTable() : m_letter('0'), m_alternative(0), m_stateFunc(nullptr) {}
+        FindTable(char letter, int alternative_, FuncPtr stateFunc_)
+                : m_letter(letter), m_alternative(alternative_), m_stateFunc(stateFunc_) {}
         char m_letter;
-        size_t m_alternative;
-        State m_state;
+        int m_alternative;
+        FuncPtr m_stateFunc;
     };
 public:
-    using FuncPtr = State(Lexer::*)();
+    Lexer(const char* filename_);
+    const std::vector<Lexem>& GetLexems();
 private:
     void initTable();
     void initFindTable();
     void initBeginVector();
+    void initRelationTable();
+    void initOperationTable();
     bool isOp(char);
     bool isRelation(char);
     bool isSemicolon(char);
@@ -106,24 +104,21 @@ private:
     State Exit4();
     void readFileText(std::string&& text_);
 private:
-    bool m_constFlag = false;
     LexemType m_registerClass;
     char m_currentChar;
-    char m_opChar;
     int m_registerNumber;
-    int m_regFind;
+    int m_registerFind;
     char m_registerRelation;
     std::string m_registerVar;
-    size_t m_currentNumberStr;
+    size_t m_currentNumberStr = 1;
     int* m_registerPointer = nullptr;
-    FindTable* m_registerFind = nullptr;
 
-    std::map<std::string, int> m_tableVars;
+    std::map<char, OperationType> m_tableOps;
     std::map<char, int> m_beginVector;
     std::map<int, FindTable> m_tableFind;
+    std::map<char, std::map<char, RelationType>> m_relationTable;
     std::vector<Lexem> m_lexems;
-    std::vector<int> m_constants;
-    FuncPtr table[StateCount][TokenCount];
+    FuncPtr m_table[StateCount][TokenCount];
 };
 
 
