@@ -270,8 +270,7 @@ void Lexer::createLexem()
         }
         case LexemType::Constant:
         {
-            int value = m_registerPointer ? *m_registerPointer : 0;
-            m_lexems.emplace_back(m_registerClass, m_currentNumberStr, std::string(), value);
+            m_lexems.emplace_back(m_registerClass, m_currentNumberStr, std::string(), m_registerNumber);
             break;
         }
         case LexemType::Comment:

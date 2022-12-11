@@ -69,5 +69,17 @@ std::ostream& operator<<(std::ostream& os_, const Lexem& lexem_)
     os_ << lexem_.ToString();
     return os_;
 }
+std::string Lexem::GetVarName() const
+{
+    return m_varName;
+}
+size_t Lexem::GetStringNumber() const
+{
+    return m_stringNumber;
+}
+int Lexem::GetConstValue() const
+{
+    return m_constValue;
+}
 
 

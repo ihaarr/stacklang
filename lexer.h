@@ -112,13 +112,13 @@ private:
     char m_registerRelation;
     std::string m_registerVar;
     size_t m_currentNumberStr = 1;
-    int* m_registerPointer = nullptr;
 
     std::map<char, OperationType> m_tableOps;
     std::map<char, int> m_beginVector;
     std::map<int, FindTable> m_tableFind;
     std::map<char, std::map<char, RelationType>> m_relationTable;
     std::vector<Lexem> m_lexems;
+    std::vector<char> m_bytecode;
     FuncPtr m_table[StateCount][TokenCount];
 };
 

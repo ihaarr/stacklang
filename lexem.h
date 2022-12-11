@@ -24,7 +24,10 @@ public:
     LexemType GetLexemType() const;
     OperationType GetOperationType() const;
     RelationType GetRelationType() const;
+    std::string GetVarName() const;
     std::string ToString() const;
+    size_t GetStringNumber() const;
+    int GetConstValue() const;
     friend std::ostream& operator<<(std::ostream& os_, const Lexem& lexem_);
 private:
     std::string getOperationInfo() const;
