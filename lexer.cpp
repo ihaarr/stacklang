@@ -42,20 +42,23 @@ void Lexer::initTable()
     {
         for(int j = 0; j < TokenCount; ++j)
         {
-            m_table[i][j] = &Lexer::E1;
+            m_table[i][j] = &Lexer::error;
         }
     }
     m_table[sA1][Letter] = &Lexer::B1a;
     m_table[sA1][Op] = &Lexer::C1a;
     m_table[sA1][Relation] = &Lexer::D1a;
     m_table[sA1][Space] = &Lexer::A1;
-    m_table[sA1][NewLine] = &Lexer::I1a;
+    m_table[sA1][NewLine] = &Lexer::A1b;
+    m_table[sA1][Semicolon] = &Lexer::I1a;
 
     m_table[sA2][Letter] = &Lexer::B1a;
     m_table[sA2][Op] = &Lexer::C1a;
     m_table[sA2][Relation] = &Lexer::D1a;
     m_table[sA2][Space] = &Lexer::A2;
     m_table[sA2][NewLine] = &Lexer::A2a;
+    m_table[sA2][Semicolon] = &Lexer::I2a;
+    m_table[sA2][End] = &Lexer::Exit1;
 
     m_table[sB1][Letter] = &Lexer::M1;
     m_table[sB1][NewLine] = &Lexer::A2f;
@@ -219,6 +222,7 @@ Lexer::Token Lexer::getTokenByChar(char ch)
 {
     if(isdigit(ch)) return Digit;
     if(isalpha(ch)) return Letter;
+    if(ch == '\0' || ch == EOF) return End;
     if(ch == ';') return Semicolon;
     if(ch == '+' || ch == '-' || ch == '/' || ch == '*' || ch == '%') return Op;
     if(ch == '=' || ch == '!' || ch == '>' || ch == '<') return Relation;
@@ -238,6 +242,11 @@ void Lexer::createLexem()
 {
     switch(m_registerClass)
     {
+        case LexemType::EndOfFile:
+        {
+            m_lexems.emplace_back(m_registerClass, m_currentNumberStr, std::string());
+            break;
+        }
         case LexemType::Op:
         {
             m_lexems.emplace_back(m_registerClass, m_currentNumberStr, std::string(), 0, m_tableOps[m_currentChar]);
@@ -277,6 +286,7 @@ Lexer::State Lexer::handleError()
 {
     m_registerClass = LexemType::Error;
     std::cout << "Error on line " << m_currentNumberStr << '\n';
+    if(m_currentChar == g_newLine) ++m_currentNumberStr;
     return sJ1;
 }
 bool Lexer::isRelation(char ch)
@@ -331,7 +341,7 @@ Lexer::State Lexer::C1()
     if(isspace(m_currentChar)) return sC1;
     if(isSemicolon(m_currentChar)) return I2a();
     if(isEndOfFile(m_currentChar)) return Exit1();
-    return sEND;
+    return error();
 }
 Lexer::State Lexer::D1()
 {
@@ -339,25 +349,25 @@ Lexer::State Lexer::D1()
     if(isRelation(m_currentChar)) return C1h();
     if(isspace(m_currentChar)) return C1g();
     if(isSemicolon(m_currentChar)) return I2d();
-    return sEND;
+    return error();
 }
 Lexer::State Lexer::E1()
 {
     if(isNewLine(m_currentChar)) return A2f();
     if(isspace(m_currentChar)) return sF1;
-    return sEND;
+    return error();
 }
 Lexer::State Lexer::E2()
 {
     if(isNewLine(m_currentChar)) return A2f();
     if(isspace(m_currentChar)) return sF2;
-    return sEND;
+    return error();
 }
 Lexer::State Lexer::E3()
 {
     if(isNewLine(m_currentChar)) return A2f();
     if(isspace(m_currentChar)) return sF3;
-    return sEND;
+    return error();
 }
 Lexer::State Lexer::F1()
 {
@@ -365,21 +375,21 @@ Lexer::State Lexer::F1()
     if(isalpha(m_currentChar)) return H1a();
     if(isdigit(m_currentChar)) return G1a();
     if(isspace(m_currentChar)) return sF1;
-    return sEND;
+    return error();
 }
 Lexer::State Lexer::F2()
 {
     if(isNewLine(m_currentChar)) return A2f();
     if(isdigit(m_currentChar)) return G1a();
     if(isspace(m_currentChar)) return sF2;
-    return sEND;
+    return error();
 }
 Lexer::State Lexer::F3()
 {
     if(isNewLine(m_currentChar)) return A2f();
     if(isalpha(m_currentChar)) return H1a();
     if(isspace(m_currentChar)) return sF3;
-    return sEND;
+    return error();
 }
 Lexer::State Lexer::G1()
 {
@@ -411,6 +421,7 @@ Lexer::State Lexer::I2()
 }
 Lexer::State Lexer::J1()
 {
+    if(m_currentChar == '\0') return sEND;
     if(isNewLine(m_currentChar)) return A2a();
     if(isEndOfFile(m_currentChar)) return Exit1();
     return sJ1;
@@ -461,10 +472,7 @@ Lexer::State Lexer::A2e()
 }
 Lexer::State Lexer::A2f()
 {
-    if(m_registerClass == LexemType::Error)
-        return handleError();
-    createLexem();
-    return sA2;
+    return handleError();
 }
 Lexer::State Lexer::B1a()
 {
@@ -538,14 +546,12 @@ Lexer::State Lexer::D1a()
 Lexer::State Lexer::E1a()
 {
     m_registerClass = LexemType::Push;
-    //////m_constFlag = true;
     createLexem();
     return sE1;
 }
 Lexer::State Lexer::E2a()
 {
     m_registerClass = LexemType::Ji;
-    //////m_constFlag = true;
     createLexem();
     return sE2;
 }
@@ -558,7 +564,6 @@ Lexer::State Lexer::E3a()
 Lexer::State Lexer::E2b()
 {
     m_registerClass = LexemType::Jmp;
-    //////m_constFlag = true;
     createLexem();
     return sE2;
 }
@@ -631,7 +636,7 @@ Lexer::State Lexer::M1()
 }
 Lexer::State Lexer::Exit1()
 {
-    m_registerClass = LexemType::End;
+    m_registerClass = LexemType::EndOfFile;
     createLexem();
     return sEND;
 }
@@ -659,6 +664,10 @@ Lexer::State Lexer::Exit4()
     m_registerClass = LexemType::End;
     createLexem();
     return sEND;
+}
+Lexer::State Lexer::error()
+{
+    return handleError();
 }
 
 

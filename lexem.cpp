@@ -59,6 +59,7 @@ std::string Lexem::ToString() const
         case LexemType::Jmp: return std::string("Lexem: jmp");
         case LexemType::Ji: return std::string("Lexem: ji");
         case LexemType::End: return std::string("Lexem: end");
+        case LexemType::EndOfFile: return std::string("Lexem: eof");
         default: return std::string("Lexem: error");
     }
 }

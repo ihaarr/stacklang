@@ -6,7 +6,7 @@
 
 enum class LexemType
 {
-    Constant, Var, Push, Pop, Op, Relation, Jmp, Ji, Read, Write, End, Comment, Error
+    Constant, Var, Push, Pop, Op, Relation, Jmp, Ji, Read, Write, End, Comment, Error, EndOfFile
 };
 enum class OperationType
 {

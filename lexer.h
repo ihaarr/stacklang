@@ -48,6 +48,7 @@ private:
     void addConst();
     void addVar();
     void createLexem();
+    State error();
     State handleError();
     State A1();
     State A2();
