@@ -12,14 +12,16 @@ Lexer::Lexer(const char *filename_)
     initBeginVector();
     initFindTable();
     initTable();
+    initRelationTable();
+    initOperationTable();
+
     std::string text = std::string(std::istreambuf_iterator<char>(fileStream), std::istreambuf_iterator<char>());
     fileStream.close();
     readFileText(std::move(text));
 }
 const std::vector<Lexem> &Lexer::GetLexems()
 {
-
-    return {};
+    return m_lexems;
 }
 void Lexer::readFileText(std::string&& text_)
 {
@@ -32,7 +34,7 @@ void Lexer::readFileText(std::string&& text_)
     {
         m_currentChar = text_[currentPos++];
         Token token = getTokenByChar(m_currentChar);
-        currentState = (this->*table[currentState][token])();
+        currentState = (this->*m_table[currentState][token])();
     }
 }
 void Lexer::initTable()
@@ -41,119 +43,119 @@ void Lexer::initTable()
     {
         for(int j = 0; j < TokenCount; ++j)
         {
-            table[i][j] = &Lexer::E1;
+            m_table[i][j] = &Lexer::E1;
         }
     }
-    table[sA1][Letter] = &Lexer::B1a;
-    table[sA1][Op] = &Lexer::C1a;
-    table[sA1][Relation] = &Lexer::D1a;
-    table[sA1][Space] = &Lexer::A1;
-    table[sA1][NewLine] = &Lexer::I1a;
+    m_table[sA1][Letter] = &Lexer::B1a;
+    m_table[sA1][Op] = &Lexer::C1a;
+    m_table[sA1][Relation] = &Lexer::D1a;
+    m_table[sA1][Space] = &Lexer::A1;
+    m_table[sA1][NewLine] = &Lexer::I1a;
 
-    table[sA2][Letter] = &Lexer::B1a;
-    table[sA2][Op] = &Lexer::C1a;
-    table[sA2][Relation] = &Lexer::D1a;
-    table[sA2][Space] = &Lexer::A2;
-    table[sA2][NewLine] = &Lexer::A2a;
+    m_table[sA2][Letter] = &Lexer::B1a;
+    m_table[sA2][Op] = &Lexer::C1a;
+    m_table[sA2][Relation] = &Lexer::D1a;
+    m_table[sA2][Space] = &Lexer::A2;
+    m_table[sA2][NewLine] = &Lexer::A2a;
 
-    table[sB1][Letter] = &Lexer::M1;
-    table[sB1][NewLine] = &Lexer::A2f;
+    m_table[sB1][Letter] = &Lexer::M1;
+    m_table[sB1][NewLine] = &Lexer::A2f;
 
-    table[sC1][Space] = &Lexer::C1;
-    table[sC1][NewLine] = &Lexer::A2;
-    table[sC1][Semicolon] = &Lexer::I2a;
-    table[sC1][End] = &Lexer::Exit1;
+    m_table[sC1][Space] = &Lexer::C1;
+    m_table[sC1][NewLine] = &Lexer::A2;
+    m_table[sC1][Semicolon] = &Lexer::I2a;
+    m_table[sC1][End] = &Lexer::Exit1;
 
-    table[sD1][Relation] = &Lexer::C1h;
-    table[sD1][Space] = &Lexer::C1g;
-    table[sD1][NewLine] = &Lexer::A2e;
-    table[sD1][Semicolon] = &Lexer::I2d;
-    table[sD1][End] = &Lexer::Exit2;
+    m_table[sD1][Relation] = &Lexer::C1h;
+    m_table[sD1][Space] = &Lexer::C1g;
+    m_table[sD1][NewLine] = &Lexer::A2e;
+    m_table[sD1][Semicolon] = &Lexer::I2d;
+    m_table[sD1][End] = &Lexer::Exit2;
 
-    table[sE1][Space] = &Lexer::F1;
-    table[sE1][NewLine] = &Lexer::A2f;
+    m_table[sE1][Space] = &Lexer::F1;
+    m_table[sE1][NewLine] = &Lexer::A2f;
 
-    table[sE2][Space] = &Lexer::F2;
-    table[sE2][NewLine] = &Lexer::A2f;
+    m_table[sE2][Space] = &Lexer::F2;
+    m_table[sE2][NewLine] = &Lexer::A2f;
 
-    table[sE3][Space] = &Lexer::F3;
-    table[sE3][NewLine] = &Lexer::A2f;
+    m_table[sE3][Space] = &Lexer::F3;
+    m_table[sE3][NewLine] = &Lexer::A2f;
 
-    table[sF1][Space] = &Lexer::F1;
-    table[sF1][NewLine] = &Lexer::A2f;
-    table[sF1][Letter] = &Lexer::H1a;
-    table[sF1][Digit] = &Lexer::G1a;
+    m_table[sF1][Space] = &Lexer::F1;
+    m_table[sF1][NewLine] = &Lexer::A2f;
+    m_table[sF1][Letter] = &Lexer::H1a;
+    m_table[sF1][Digit] = &Lexer::G1a;
 
-    table[sF2][Space] = &Lexer::F2;
-    table[sF2][NewLine] = &Lexer::A2f;
-    table[sF2][Digit] = &Lexer::G1a;
+    m_table[sF2][Space] = &Lexer::F2;
+    m_table[sF2][NewLine] = &Lexer::A2f;
+    m_table[sF2][Digit] = &Lexer::G1a;
 
-    table[sF3][Space] = &Lexer::F3;
-    table[sF3][NewLine] = &Lexer::A2f;
-    table[sF3][Letter] = &Lexer::H1a;
+    m_table[sF3][Space] = &Lexer::F3;
+    m_table[sF3][NewLine] = &Lexer::A2f;
+    m_table[sF3][Letter] = &Lexer::H1a;
 
-    table[sG1][Digit] = &Lexer::G1b;
-    table[sG1][Space] = &Lexer::C1e;
-    table[sG1][NewLine] = &Lexer::A2c;
-    table[sG1][Semicolon] = &Lexer::I2b;
-    table[sG1][End] = &Lexer::Exit3;
+    m_table[sG1][Digit] = &Lexer::G1b;
+    m_table[sG1][Space] = &Lexer::C1e;
+    m_table[sG1][NewLine] = &Lexer::A2c;
+    m_table[sG1][Semicolon] = &Lexer::I2b;
+    m_table[sG1][End] = &Lexer::Exit3;
 
-    table[sH1][Letter] = &Lexer::H1b;
-    table[sH1][Digit] = &Lexer::H1b;
-    table[sH1][Space] = &Lexer::C1f;
-    table[sH1][NewLine] = &Lexer::A2d;
-    table[sH1][Semicolon] = &Lexer::I2c;
-    table[sH1][End] = &Lexer::Exit4;
+    m_table[sH1][Letter] = &Lexer::H1b;
+    m_table[sH1][Digit] = &Lexer::H1b;
+    m_table[sH1][Space] = &Lexer::C1f;
+    m_table[sH1][NewLine] = &Lexer::A2d;
+    m_table[sH1][Semicolon] = &Lexer::I2c;
+    m_table[sH1][End] = &Lexer::Exit4;
 
-    table[sI1][Letter] = &Lexer::I1;
-    table[sI1][Digit] = &Lexer::I1;
-    table[sI1][Op] = &Lexer::I1;
-    table[sI1][Relation] = &Lexer::I1;
-    table[sI1][Space] = &Lexer::I1;
-    table[sI1][NewLine] = &Lexer::A1a;
-    table[sI1][Semicolon] = &Lexer::I1;
-    table[sI1][Error] = &Lexer::I1;
+    m_table[sI1][Letter] = &Lexer::I1;
+    m_table[sI1][Digit] = &Lexer::I1;
+    m_table[sI1][Op] = &Lexer::I1;
+    m_table[sI1][Relation] = &Lexer::I1;
+    m_table[sI1][Space] = &Lexer::I1;
+    m_table[sI1][NewLine] = &Lexer::A1a;
+    m_table[sI1][Semicolon] = &Lexer::I1;
+    m_table[sI1][Error] = &Lexer::I1;
 
-    table[sI2][Letter] = &Lexer::I2;
-    table[sI2][Digit] = &Lexer::I2;
-    table[sI2][Op] = &Lexer::I2;
-    table[sI2][Relation] = &Lexer::I2;
-    table[sI2][Space] = &Lexer::I2;
-    table[sI2][NewLine] = &Lexer::A2b;
-    table[sI2][Semicolon] = &Lexer::I2;
-    table[sI2][Error] = &Lexer::I2;
-    table[sI2][End] = &Lexer::Exit1;
+    m_table[sI2][Letter] = &Lexer::I2;
+    m_table[sI2][Digit] = &Lexer::I2;
+    m_table[sI2][Op] = &Lexer::I2;
+    m_table[sI2][Relation] = &Lexer::I2;
+    m_table[sI2][Space] = &Lexer::I2;
+    m_table[sI2][NewLine] = &Lexer::A2b;
+    m_table[sI2][Semicolon] = &Lexer::I2;
+    m_table[sI2][Error] = &Lexer::I2;
+    m_table[sI2][End] = &Lexer::Exit1;
 
-    table[sJ1][Letter] = &Lexer::J1;
-    table[sJ1][Digit] = &Lexer::J1;
-    table[sJ1][Op] = &Lexer::J1;
-    table[sJ1][Relation] = &Lexer::J1;
-    table[sJ1][Space] = &Lexer::J1;
-    table[sJ1][NewLine] = &Lexer::A1b;
-    table[sJ1][Semicolon] = &Lexer::J1;
-    table[sJ1][Error] = &Lexer::J1;
-    table[sJ1][End] = &Lexer::Exit1;
+    m_table[sJ1][Letter] = &Lexer::J1;
+    m_table[sJ1][Digit] = &Lexer::J1;
+    m_table[sJ1][Op] = &Lexer::J1;
+    m_table[sJ1][Relation] = &Lexer::J1;
+    m_table[sJ1][Space] = &Lexer::J1;
+    m_table[sJ1][NewLine] = &Lexer::A1b;
+    m_table[sJ1][Semicolon] = &Lexer::J1;
+    m_table[sJ1][Error] = &Lexer::J1;
+    m_table[sJ1][End] = &Lexer::Exit1;
 }
 void Lexer::initFindTable()
 {
-    m_tableFind[0] = FindTable('0', 0, State::sEND);
-    m_tableFind[1] = FindTable('n', 0, State::sB1b);
-    m_tableFind[2] = FindTable('d', 0, State::sC1b);
-    m_tableFind[3] = FindTable('i', 4, State::sE2a);
-    m_tableFind[4] = FindTable('m', 0, State::sB1b);
-    m_tableFind[5] = FindTable('p', 0, State::sE2b);
-    m_tableFind[6] = FindTable('o', 8, State::sB1b);
-    m_tableFind[7] = FindTable('p', 0, State::sE3a);
-    m_tableFind[8] = FindTable('u', 0, State::sB1b);
-    m_tableFind[9] = FindTable('s', 0, State::sB1b);
-    m_tableFind[10] = FindTable('h', 0, State::sE1a);
-    m_tableFind[11] = FindTable('e', 0, State::sB1b);
-    m_tableFind[12] = FindTable('s', 0, State::sB1b);
-    m_tableFind[13] = FindTable('d', 0, State::sC1c);
-    m_tableFind[14] = FindTable('r', 0, State::sB1b);
-    m_tableFind[15] = FindTable('i', 0, State::sB1b);
-    m_tableFind[16] = FindTable('t', 0, State::sB1b);
-    m_tableFind[17] = FindTable('e', 0, State::sC1d);
+    m_tableFind[0] = FindTable('0', 0, nullptr);
+    m_tableFind[1] = FindTable('n', 0, &Lexer::B1b);
+    m_tableFind[2] = FindTable('d', 0, &Lexer::C1b);
+    m_tableFind[3] = FindTable('i', 4, &Lexer::E2a);
+    m_tableFind[4] = FindTable('m', 0, &Lexer::B1b);
+    m_tableFind[5] = FindTable('p', 0, &Lexer::E2b);
+    m_tableFind[6] = FindTable('o', 8, &Lexer::B1b);
+    m_tableFind[7] = FindTable('p', 0, &Lexer::E3a);
+    m_tableFind[8] = FindTable('u', 0, &Lexer::B1b);
+    m_tableFind[9] = FindTable('s', 0, &Lexer::B1b);
+    m_tableFind[10] = FindTable('h', 0, &Lexer::E1a);
+    m_tableFind[11] = FindTable('e', 0, &Lexer::B1b);
+    m_tableFind[12] = FindTable('a', 0, &Lexer::B1b);
+    m_tableFind[13] = FindTable('d', 0, &Lexer::C1c);
+    m_tableFind[14] = FindTable('r', 0, &Lexer::B1b);
+    m_tableFind[15] = FindTable('i', 0, &Lexer::B1b);
+    m_tableFind[16] = FindTable('t', 0, &Lexer::B1b);
+    m_tableFind[17] = FindTable('e', 0, &Lexer::C1d);
 }
 void Lexer::initBeginVector()
 {
@@ -184,6 +186,36 @@ void Lexer::initBeginVector()
     m_beginVector['r'] = 11;
     m_beginVector['w'] = 14;
 }
+void Lexer::initRelationTable()
+{
+    m_relationTable['=']['='] = RelationType::Undefined;
+    m_relationTable['=']['!'] = RelationType::Undefined;
+    m_relationTable['=']['<'] = RelationType::Undefined;
+    m_relationTable['=']['>'] = RelationType::Undefined;
+
+    m_relationTable['!']['='] = RelationType::NotEqual;
+    m_relationTable['!']['!'] = RelationType::Undefined;
+    m_relationTable['!']['<'] = RelationType::Undefined;
+    m_relationTable['!']['>'] = RelationType::Undefined;
+
+    m_relationTable['<']['='] = RelationType::LessEqual;
+    m_relationTable['<']['!'] = RelationType::Undefined;
+    m_relationTable['<']['<'] = RelationType::Undefined;
+    m_relationTable['<']['>'] = RelationType::Undefined;
+
+    m_relationTable['>']['='] = RelationType::GreaterEqual;
+    m_relationTable['>']['!'] = RelationType::Undefined;
+    m_relationTable['>']['<'] = RelationType::Undefined;
+    m_relationTable['>']['>'] = RelationType::Undefined;
+}
+void Lexer::initOperationTable()
+{
+    m_tableOps['+'] = OperationType::Plus;
+    m_tableOps['-'] = OperationType::Minus;
+    m_tableOps['/'] = OperationType::Div;
+    m_tableOps['%'] = OperationType::Mod;
+    m_tableOps['*'] = OperationType::Multiply;
+}
 Lexer::Token Lexer::getTokenByChar(char ch)
 {
     if(isdigit(ch)) return Digit;
@@ -200,20 +232,52 @@ void Lexer::addConst()
     if(!m_constFlag) return;
     m_constants.push_back(m_registerNumber);
     m_registerPointer = &m_constants[m_constants.size() - 1];
+    m_registerClass = LexemType::Constant;
 }
 void Lexer::addVar()
 {
     m_tableVars[m_registerVar] = m_registerNumber;
     m_registerPointer = &m_tableVars[m_registerVar];
+    m_registerClass = LexemType::Var;
 }
 void Lexer::createLexem()
 {
-
+    switch(m_registerClass)
+    {
+        case LexemType::Op:
+        {
+            m_lexems.emplace_back(m_registerClass, m_currentNumberStr, std::string(), 0, m_tableOps[m_currentChar]);
+            break;
+        }
+        case LexemType::Relation:
+        {
+            RelationType type = m_relationTable[m_registerRelation][m_currentChar];
+            m_lexems.emplace_back(m_registerClass, m_currentNumberStr, std::string(), 0,
+                                  OperationType::Undefined, type);
+            break;
+        }
+        case LexemType::Var:
+        {
+            m_lexems.emplace_back(m_registerClass, m_currentNumberStr, m_registerVar);
+            break;
+        }
+        case LexemType::Constant:
+        {
+            int value = m_registerPointer ? *m_registerPointer : 0;
+            m_lexems.emplace_back(m_registerClass, m_currentNumberStr, std::string(), value);
+            break;
+        }
+        case LexemType::Comment:
+        {
+            break;
+        }
+        default:
+            m_lexems.emplace_back(m_registerClass, m_currentNumberStr, std::string());
+    }
 }
 Lexer::State Lexer::handleError()
 {
     m_registerClass = LexemType::Error;
-    createLexem();
     std::cout << "Error on line " << m_currentNumberStr << '\n';
     return sJ1;
 }
@@ -237,14 +301,13 @@ bool Lexer::isEndOfFile(char ch)
 {
     return ch == EOF;
 }
-
 Lexer::State Lexer::A1()
 {
+    if(isNewLine(m_currentChar)) return sA1b;
     if(isalpha(m_currentChar)) return sB1a;
     if(isOp(m_currentChar)) return sC1a;
     if(isRelation(m_currentChar)) return sD1a;
     if(isspace(m_currentChar)) return sA1;
-    if(isNewLine(m_currentChar)) return sA1b;
     if(isSemicolon(m_currentChar)) return sI1a;
     return sEND; //Чтобы не выдавал ошибку
 }
@@ -253,8 +316,8 @@ Lexer::State Lexer::A2()
     if(isalpha(m_currentChar)) return sB1a;
     if(isOp(m_currentChar)) return sC1a;
     if(isRelation(m_currentChar)) return sD1a;
+    if(isNewLine(m_currentChar))return sA2a;
     if(isspace(m_currentChar)) return sA2;
-    if(isNewLine(m_currentChar)) return sA2a;
     if(isSemicolon(m_currentChar)) return sI2a;
     return sExit1;
 }
@@ -266,74 +329,74 @@ Lexer::State Lexer::B1()
 }
 Lexer::State Lexer::C1()
 {
-    if(isspace(m_currentChar)) return sC1;
     if(isNewLine(m_currentChar)) return sA2;
+    if(isspace(m_currentChar)) return sC1;
     if(isSemicolon(m_currentChar)) return sI2a;
     if(isEndOfFile(m_currentChar)) return sExit1;
     return sEND;
 }
 Lexer::State Lexer::D1()
 {
+    if(isNewLine(m_currentChar)) return sA2e;
     if(isRelation(m_currentChar)) return sC1h;
     if(isspace(m_currentChar)) return sC1g;
-    if(isNewLine(m_currentChar)) return sA2e;
     if(isSemicolon(m_currentChar)) return sI2d;
     return sEND;
 }
 Lexer::State Lexer::E1()
 {
-    if(isspace(m_currentChar)) return sF1;
     if(isNewLine(m_currentChar)) return sA2f;
+    if(isspace(m_currentChar)) return sF1;
     return sEND;
 }
 Lexer::State Lexer::E2()
 {
-    if(isspace(m_currentChar)) return sF2;
     if(isNewLine(m_currentChar)) return sA2f;
+    if(isspace(m_currentChar)) return sF2;
     return sEND;
 }
 Lexer::State Lexer::E3()
 {
-    if(isspace(m_currentChar)) return sF3;
     if(isNewLine(m_currentChar)) return sA2f;
+    if(isspace(m_currentChar)) return sF3;
     return sEND;
 }
 Lexer::State Lexer::F1()
 {
+    if(isNewLine(m_currentChar)) return sA2f;
     if(isalpha(m_currentChar)) return sH1a;
     if(isdigit(m_currentChar)) return sG1a;
     if(isspace(m_currentChar)) return sF1;
-    if(isNewLine(m_currentChar)) return sA2f;
     return sEND;
 }
 Lexer::State Lexer::F2()
 {
+    if(isNewLine(m_currentChar)) return sA2f;
     if(isdigit(m_currentChar)) return sG1a;
     if(isspace(m_currentChar)) return sF2;
-    if(isNewLine(m_currentChar)) return sA2f;
     return sEND;
 }
 Lexer::State Lexer::F3()
 {
+    if(isNewLine(m_currentChar)) return sA2f;
     if(isalpha(m_currentChar)) return sH1a;
     if(isspace(m_currentChar)) return sF3;
-    if(isNewLine(m_currentChar)) return sA2f;
     return sEND;
 }
 Lexer::State Lexer::G1()
 {
+    if(isNewLine(m_currentChar)) return sA2c;
     if(isdigit(m_currentChar)) return sG1b;
     if(isspace(m_currentChar)) return sC1e;
-    if(isNewLine(m_currentChar)) return sA2c;
     if(isSemicolon(m_currentChar)) return sI2b;
     return sExit3;
 }
 Lexer::State Lexer::H1()
 {
+    if(isNewLine(m_currentChar)) return sA2d;
     if(isalpha(m_currentChar)) return sH1b;
     if(isdigit(m_currentChar)) return sH1b;
     if(isspace(m_currentChar)) return sC1f;
-    if(isNewLine(m_currentChar)) return sA2d;
     if(isSemicolon(m_currentChar)) return sI2c;
     return sExit4;
 }
@@ -393,7 +456,7 @@ Lexer::State Lexer::A2d()
 Lexer::State Lexer::A2e()
 {
     if(m_registerRelation == '!')
-        handleError();
+        return handleError();
     createLexem();
     ++m_currentNumberStr;
     return sA2;
@@ -401,25 +464,25 @@ Lexer::State Lexer::A2e()
 Lexer::State Lexer::A2f()
 {
     if(m_registerClass == LexemType::Error)
-        handleError();
+        return handleError();
     createLexem();
-    ++m_currentNumberStr;
     return sA2;
 }
 Lexer::State Lexer::B1a()
 {
-    m_registerFind = &m_tableFind[m_beginVector[m_currentChar]];
-    // if = 0 handleError() if(*m_registerFind)
-    return sB1a;
+    m_registerFind = m_beginVector[m_currentChar];
+    if(m_registerFind == 0)
+        return handleError();
+    return sB1;
 }
 Lexer::State Lexer::B1b()
 {
+    ++m_registerFind;
     return sB1;
 }
 Lexer::State Lexer::C1a()
 {
     m_registerClass = LexemType::Op;
-    m_opChar = m_currentChar;
     createLexem();
     return sC1;
 }
@@ -456,13 +519,16 @@ Lexer::State Lexer::C1f()
 Lexer::State Lexer::C1g()
 {
     if(m_registerRelation == '!')
-        handleError();
+        return handleError();
     createLexem();
     return sC1;
 }
 Lexer::State Lexer::C1h()
 {
-    //todo
+    RelationType type = m_relationTable[m_registerRelation][m_currentChar];
+    if(type == RelationType::Undefined)
+        return handleError();
+    createLexem();
     return sC1;
 }
 Lexer::State Lexer::D1a()
@@ -475,23 +541,27 @@ Lexer::State Lexer::E1a()
 {
     m_registerClass = LexemType::Push;
     m_constFlag = true;
+    createLexem();
     return sE1;
 }
 Lexer::State Lexer::E2a()
 {
-    m_registerClass = LexemType::Push;
+    m_registerClass = LexemType::Ji;
     m_constFlag = false;
+    createLexem();
     return sE2;
 }
 Lexer::State Lexer::E3a()
 {
     m_registerClass = LexemType::Pop;
+    createLexem();
     return sE3;
 }
 Lexer::State Lexer::E2b()
 {
     m_registerClass = LexemType::Jmp;
     m_constFlag = false;
+    createLexem();
     return sE2;
 }
 Lexer::State Lexer::G1a()
@@ -507,7 +577,7 @@ Lexer::State Lexer::G1b()
 Lexer::State Lexer::H1a()
 {
     m_registerVar.clear();
-    m_registerVar[0] = m_currentChar;
+    m_registerVar.push_back(m_currentChar);
     return sH1;
 }
 Lexer::State Lexer::H1b()
@@ -542,14 +612,24 @@ Lexer::State Lexer::I2c()
 Lexer::State Lexer::I2d()
 {
     if(m_registerRelation == '!')
-        handleError();
+        return handleError();
     createLexem();
     m_registerClass = LexemType::Comment;
+
     return sI2;
 }
 Lexer::State Lexer::M1()
 {
-    return sM1;
+    while(true)
+    {
+        auto& table = m_tableFind[m_registerFind];
+        auto ptr = table.m_stateFunc;
+        if(table.m_letter == m_currentChar)
+            return (this->*ptr)();
+        else
+            m_registerFind = table.m_alternative;
+        if(m_registerFind == 0) return handleError();
+    }
 }
 Lexer::State Lexer::Exit1()
 {
@@ -582,4 +662,5 @@ Lexer::State Lexer::Exit4()
     createLexem();
     return sEND;
 }
+
 
