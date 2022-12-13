@@ -13,7 +13,7 @@ class Lexer final
 private:
     enum State
     {
-        sA1, sA2, sB1, sC1, sD1, sE1, sE2, sE3, sF1, sF2, sF3, sG1, sH1, sI1, sI2, sJ1, sEND, sM1, StateCount
+        sA1, sA2, sB1, sC1, sD1, sE1, sE2, sE3, sE4, sF1, sF2, sF3, sG1, sH1, sI1, sI2, sJ1, sEND, sM1, sK1, sK2, sK3, sK4, StateCount
     };
 public:
     using FuncPtr = State (Lexer::*)();
@@ -58,9 +58,14 @@ private:
     State E1();
     State E2();
     State E3();
+    State E4();
     State F1();
     State F2();
     State F3();
+    State K1();
+    State K2();
+    State K3();
+    State K4();
     State G1();
     State H1();
     State I1();
@@ -89,6 +94,7 @@ private:
     State E2a();
     State E2b();
     State E3a();
+    State E4a();
     State G1a();
     State G1b();
     State H1a();

@@ -83,6 +83,9 @@ void Lexer::initTable()
     m_table[sE3][Space] = &Lexer::F3;
     m_table[sE3][NewLine] = &Lexer::A2f;
 
+    m_table[sE4][Space] = &Lexer::E4;
+    m_table[sE4][NewLine] = &Lexer::E4;
+
     m_table[sF1][Space] = &Lexer::F1;
     m_table[sF1][NewLine] = &Lexer::A2f;
     m_table[sF1][Letter] = &Lexer::H1a;
@@ -137,6 +140,13 @@ void Lexer::initTable()
     m_table[sJ1][Semicolon] = &Lexer::J1;
     m_table[sJ1][Error] = &Lexer::J1;
     m_table[sJ1][End] = &Lexer::Exit1;
+
+    m_table[sK1][Space] = &Lexer::K1;
+    m_table[sK2][Space] = &Lexer::K2;
+    m_table[sK3][Space] = &Lexer::K3;
+
+    m_table[sK4][NewLine] = &Lexer::K4;
+    m_table[sK4][Space] = &Lexer::K4;
 }
 void Lexer::initFindTable()
 {
@@ -158,6 +168,8 @@ void Lexer::initFindTable()
     m_tableFind[15] = FindTable('i', 0, &Lexer::B1b);
     m_tableFind[16] = FindTable('t', 0, &Lexer::B1b);
     m_tableFind[17] = FindTable('e', 0, &Lexer::C1d);
+    m_tableFind[18] = FindTable('o', 0, &Lexer::B1b);
+    m_tableFind[19] = FindTable('n', 0, &Lexer::E4a);
 }
 void Lexer::initBeginVector()
 {
@@ -171,7 +183,7 @@ void Lexer::initBeginVector()
     m_beginVector['i'] = 0;
     m_beginVector['k'] = 0;
     m_beginVector['l'] = 0;
-    m_beginVector['m'] = 0;
+    m_beginVector['m'] = 18;
     m_beginVector['n'] = 0;
     m_beginVector['o'] = 0;
     m_beginVector['q'] = 0;
@@ -285,7 +297,11 @@ Lexer::State Lexer::handleError()
 {
     m_registerClass = LexemType::Error;
     std::cout << "Error on line " << m_currentNumberStr << '\n';
-    if(m_currentChar == g_newLine) ++m_currentNumberStr;
+    if(m_currentChar == g_newLine)
+    {
+        ++m_currentNumberStr;
+        return sA2;
+    }
     return sJ1;
 }
 bool Lexer::isRelation(char ch)
@@ -353,19 +369,37 @@ Lexer::State Lexer::D1()
 Lexer::State Lexer::E1()
 {
     if(isNewLine(m_currentChar)) return A2f();
-    if(isspace(m_currentChar)) return sF1;
+    if(isspace(m_currentChar))
+    {
+        createLexem();
+        return sF1;
+    }
     return error();
 }
 Lexer::State Lexer::E2()
 {
     if(isNewLine(m_currentChar)) return A2f();
-    if(isspace(m_currentChar)) return sF2;
+    if(isspace(m_currentChar))
+    {
+        createLexem();
+        return sF2;
+    }
     return error();
 }
 Lexer::State Lexer::E3()
 {
     if(isNewLine(m_currentChar)) return A2f();
-    if(isspace(m_currentChar)) return sF3;
+    if(isspace(m_currentChar))
+    {
+        createLexem();
+        return sF3;
+    }
+    return error();
+}
+Lexer::State Lexer::E4()
+{
+    if(isNewLine(m_currentChar)) return sA2;
+    if(isspace(m_currentChar)) return sE4;
     return error();
 }
 Lexer::State Lexer::F1()
@@ -373,14 +407,20 @@ Lexer::State Lexer::F1()
     if(isNewLine(m_currentChar)) return A2f();
     if(isalpha(m_currentChar)) return H1a();
     if(isdigit(m_currentChar)) return G1a();
-    if(isspace(m_currentChar)) return sF1;
+    if(isspace(m_currentChar))
+    {
+        return sF1;
+    }
     return error();
 }
 Lexer::State Lexer::F2()
 {
     if(isNewLine(m_currentChar)) return A2f();
     if(isdigit(m_currentChar)) return G1a();
-    if(isspace(m_currentChar)) return sF2;
+    if(isspace(m_currentChar))
+    {
+        return sF2;
+    }
     return error();
 }
 Lexer::State Lexer::F3()
@@ -388,6 +428,48 @@ Lexer::State Lexer::F3()
     if(isNewLine(m_currentChar)) return A2f();
     if(isalpha(m_currentChar)) return H1a();
     if(isspace(m_currentChar)) return sF3;
+    return error();
+}
+Lexer::State Lexer::K1()
+{
+    if(isspace(m_currentChar))
+    {
+        createLexem();
+        return sF1;
+    }
+    return error();
+}
+Lexer::State Lexer::K2()
+{
+    if(isNewLine(m_currentChar)) return handleError();
+    if(isspace(m_currentChar))
+    {
+        createLexem();
+        return sF2;
+    }
+    return error();
+}
+Lexer::State Lexer::K3()
+{
+    if(isspace(m_currentChar))
+    {
+        createLexem();
+        return sF3;
+    }
+    return error();
+}
+Lexer::State Lexer::K4()
+{
+    if(isNewLine(m_currentChar))
+    {
+        createLexem();
+        ++m_currentNumberStr;
+        return sA2;
+    }
+    if(isspace(m_currentChar))
+    {
+        return sK4;
+    }
     return error();
 }
 Lexer::State Lexer::G1()
@@ -545,26 +627,27 @@ Lexer::State Lexer::D1a()
 Lexer::State Lexer::E1a()
 {
     m_registerClass = LexemType::Push;
-    createLexem();
-    return sE1;
+    return sK1;
 }
 Lexer::State Lexer::E2a()
 {
     m_registerClass = LexemType::Ji;
-    createLexem();
-    return sE2;
+    return sK2;
 }
 Lexer::State Lexer::E3a()
 {
     m_registerClass = LexemType::Pop;
-    createLexem();
-    return sE3;
+    return sK3;
 }
 Lexer::State Lexer::E2b()
 {
     m_registerClass = LexemType::Jmp;
-    createLexem();
-    return sE2;
+    return sK2;
+}
+Lexer::State Lexer::E4a()
+{
+    m_registerClass = LexemType::Mon;
+    return sK4;
 }
 Lexer::State Lexer::G1a()
 {
