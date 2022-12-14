@@ -1,146 +1,287 @@
 #include <utility>
 #include "virtual_machine.h"
 
-VirtualMachine::VirtualMachine(std::vector<Lexem> lexems_) : m_lexems(std::move(lexems_))
+VirtualMachine::VirtualMachine()
 {
-
 }
-size_t VirtualMachine::getOffsetFromBegin(size_t str)
+size_t VirtualMachine::getOffsetFromBegin(const std::vector<Lexem>& lexems_, size_t str)
 {
     size_t offset = 0;
-    for(size_t i = 0; i < m_lexems.size(); ++i)
+    for(size_t i = 0; i < lexems_.size(); ++i)
     {
-        if(m_lexems[i].GetStringNumber() >= str)
+        if(lexems_[i].GetStringNumber() >= str)
             break;
-        offset += getLexemSizeInBytecode(m_lexems[i]);
+        offset += getLexemSizeInBytecode(lexems_[i]);
     }
     return offset;
 }
+std::pair<VirtualMachine::Var, VirtualMachine::Var> VirtualMachine::getTwoVarsFromStack()
+{
+    Var b = m_stack.top();
+    m_stack.pop();
+    Var a = m_stack.top();
+    m_stack.pop();
+    return {std::move(a), std::move(b)};
+}
 void VirtualMachine::plus()
 {
-    int b = m_stack.top();
-    m_stack.pop();
-    int a = m_stack.top();
-    m_stack.pop();
-    m_stack.push(a + b);
+    auto pair = getTwoVarsFromStack();
+    if(pair.first.type != pair.second.type)
+        throw 100;
+
+    switch(pair.first.type)
+    {
+        case VarType::Int:
+        {
+            m_stack.push(Var(VarType::Int, pair.first.dataInt + pair.second.dataInt, {}));
+            break;
+        }
+        case VarType::MyType:
+        {
+            m_stack.push(Var(VarType::MyType, 0, pair.first.dataPol + pair.second.dataPol));
+            break;
+        }
+        default:
+            throw 10;
+    }
 }
 void VirtualMachine::minus()
 {
-    int b = m_stack.top();
-    m_stack.pop();
-    int a = m_stack.top();
-    m_stack.pop();
-    m_stack.push(a - b);
+    auto pair = getTwoVarsFromStack();
+    if(pair.first.type != pair.second.type)
+        throw 100;
+
+    switch(pair.first.type)
+    {
+        case VarType::Int:
+        {
+            m_stack.push(Var(VarType::Int, pair.first.dataInt - pair.second.dataInt, {}));
+            break;
+        }
+        case VarType::MyType:
+        {
+            m_stack.push(Var(VarType::MyType, 0, pair.first.dataPol - pair.second.dataPol));
+            break;
+        }
+        default:
+            throw 10;
+    }
 }
 void VirtualMachine::multiply()
 {
-    int b = m_stack.top();
-    m_stack.pop();
-    int a = m_stack.top();
-    m_stack.pop();
-    m_stack.push(a * b);
+    auto pair = getTwoVarsFromStack();
+    if(pair.first.type != pair.second.type)
+        throw 100;
+
+    switch(pair.first.type)
+    {
+        case VarType::Int:
+        {
+            m_stack.push(Var(VarType::Int, pair.first.dataInt * pair.second.dataInt, {}));
+            break;
+        }
+        case VarType::MyType:
+        {
+            m_stack.push(Var(VarType::MyType, 0, pair.first.dataPol * pair.second.dataPol));
+            break;
+        }
+        default:
+            throw 10;
+    }
 }
 void VirtualMachine::mod()
 {
-    int b = m_stack.top();
-    m_stack.pop();
-    int a = m_stack.top();
-    m_stack.pop();
-    m_stack.push(a % b);
+    auto pair = getTwoVarsFromStack();
+    if(pair.first.type != pair.second.type)
+        throw 100;
+
+    switch(pair.first.type)
+    {
+        case VarType::Int:
+        {
+            m_stack.push(Var(VarType::Int, pair.first.dataInt % pair.second.dataInt, {}));
+            break;
+        }
+        case VarType::MyType:
+        {
+            m_stack.push(Var(VarType::MyType, 0, pair.first.dataPol % pair.second.dataPol));
+            break;
+        }
+        default:
+            throw 10;
+    }
 }
 void VirtualMachine::div()
 {
-    int b = m_stack.top();
-    m_stack.pop();
-    int a = m_stack.top();
-    m_stack.pop();
-    m_stack.push(a / b);
+    auto pair = getTwoVarsFromStack();
+    if(pair.first.type != pair.second.type)
+        throw 100;
+
+    switch(pair.first.type)
+    {
+        case VarType::Int:
+        {
+            m_stack.push(Var(VarType::Int, pair.first.dataInt / pair.second.dataInt, {}));
+            break;
+        }
+        case VarType::MyType:
+        {
+            m_stack.push(Var(VarType::MyType, 0, pair.first.dataPol / pair.second.dataPol));
+            break;
+        }
+        default:
+            throw 10;
+    }
 }
 void VirtualMachine::equal()
 {
-    int b = m_stack.top();
-    m_stack.pop();
-    int a = m_stack.top();
-    m_stack.pop();
-    m_stack.push(a == b);
+    auto pair = getTwoVarsFromStack();
+    if(pair.first.type != pair.second.type)
+        throw 100;
+
+    switch(pair.first.type)
+    {
+        case VarType::Int:
+        {
+            m_stack.push(Var(VarType::Int, pair.first.dataInt == pair.second.dataInt, {}));
+            break;
+        }
+        case VarType::MyType:
+        {
+            m_stack.push(Var(VarType::Int, pair.first.dataPol == pair.second.dataPol, {}));
+            break;
+        }
+        default:
+            throw 10;
+    }
 }
 void VirtualMachine::notEqual()
 {
-    int b = m_stack.top();
-    m_stack.pop();
-    int a = m_stack.top();
-    m_stack.pop();
-    m_stack.push(a != b);
+    auto pair = getTwoVarsFromStack();
+    if(pair.first.type != pair.second.type)
+        throw 100;
+
+    switch(pair.first.type)
+    {
+        case VarType::Int:
+        {
+            m_stack.push(Var(VarType::Int, pair.first.dataInt != pair.second.dataInt, {}));
+            break;
+        }
+        case VarType::MyType:
+        {
+            m_stack.push(Var(VarType::Int, pair.first.dataPol != pair.second.dataPol, {}));
+            break;
+        }
+        default:
+            throw 10;
+    }
 }
 void VirtualMachine::greater()
 {
-    int b = m_stack.top();
-    m_stack.pop();
-    int a = m_stack.top();
-    m_stack.pop();
-    m_stack.push(a > b);
+    auto pair = getTwoVarsFromStack();
+    if(pair.first.type != pair.second.type)
+        throw 100;
+
+    switch(pair.first.type)
+    {
+        case VarType::Int:
+        {
+            m_stack.push(Var(VarType::Int, pair.first.dataInt > pair.second.dataInt, {}));
+            break;
+        }
+        default:
+            throw 105;
+    }
 }
 void VirtualMachine::less()
 {
-    int b = m_stack.top();
-    m_stack.pop();
-    int a = m_stack.top();
-    m_stack.pop();
-    m_stack.push(a < b);
+    auto pair = getTwoVarsFromStack();
+    if(pair.first.type != pair.second.type)
+        throw 100;
+
+    switch(pair.first.type)
+    {
+        case VarType::Int:
+        {
+            m_stack.push(Var(VarType::Int, pair.first.dataInt > pair.second.dataInt, {}));
+            break;
+        }
+        default:
+            throw 105;
+    }
 }
 void VirtualMachine::lessEqual()
 {
-    int b = m_stack.top();
-    m_stack.pop();
-    int a = m_stack.top();
-    m_stack.pop();
-    m_stack.push(a <= b);
+    auto pair = getTwoVarsFromStack();
+    if(pair.first.type != pair.second.type)
+        throw 100;
+
+    switch(pair.first.type)
+    {
+        case VarType::Int:
+        {
+            m_stack.push(Var(VarType::Int, pair.first.dataInt <= pair.second.dataInt, {}));
+            break;
+        }
+        default:
+            throw 105;
+    }
 }
 void VirtualMachine::greaterEqual()
 {
-    int b = m_stack.top();
-    m_stack.pop();
-    int a = m_stack.top();
-    m_stack.pop();
-    m_stack.push(a >= b);
+    auto pair = getTwoVarsFromStack();
+    if(pair.first.type != pair.second.type)
+        throw 100;
+
+    switch(pair.first.type)
+    {
+        case VarType::Int:
+        {
+            m_stack.push(Var(VarType::Int, pair.first.dataInt >= pair.second.dataInt, {}));
+            break;
+        }
+        default:
+            throw 105;
+    }
 }
-std::vector<byte> VirtualMachine::GenerateByteCode()
+void VirtualMachine::generateByteCode(const std::vector<Lexem>& lexems_)
 {
-    std::vector<byte> bytecode;
     size_t size = 0;
-    for(const auto& lexem : m_lexems)
+    for(const auto& lexem : lexems_)
     {
         size += getLexemSizeInBytecode(lexem);
     }
-    bytecode.reserve(size);
-    for(size_t i = 0; i < m_lexems.size(); ++i)
+    m_bytecode.reserve(size);
+    for(size_t i = 0; i < lexems_.size(); ++i)
     {
-        Code code = getLexemCode(m_lexems[i]);
+        Code code = getLexemCode(lexems_[i]);
         switch(code)
         {
             case Code::Push:
             case Code::Pop:
             {
                 ++i;
-                LexemType lexemType = m_lexems[i].GetLexemType();
+                LexemType lexemType = lexems_[i].GetLexemType();
                 if(lexemType == LexemType::Constant)
                 {
-                    bytecode.push_back(static_cast<byte>(code));
-                    const size_t* b = &*m_constants.insert(m_lexems[i].GetConstValue()).first;
-                    byte* val = reinterpret_cast<byte*>(&b);
+                    m_bytecode.push_back(static_cast<byte>(code));
+                    m_constants.emplace_back(VarType::Int, lexems_[i].GetConstValue(), Polynominal());
+                    auto* varPtr = &m_constants.back();
+                    byte* val = reinterpret_cast<byte*>(&varPtr);
                     for(size_t k = 0; k < sizeof(int*); ++k)
                     {
-                        bytecode.push_back(val[k]);
+                        m_bytecode.push_back(val[k]);
                     }
                 }
                 else if(lexemType == LexemType::Var)
                 {
-                    bytecode.push_back(static_cast<byte>(code));
-                    size_t* varPtr = &m_tableVars[m_lexems[i].GetVarName()];
+                    m_bytecode.push_back(static_cast<byte>(code));
+                    auto varPtr = &m_tableVars.insert({lexems_[i].GetVarName(), Var(lexems_[i].GetVarType(), lexems_[i].GetConstValue(), {})}).first->second;
                     byte* var = reinterpret_cast<byte*>(&varPtr);
                     for(size_t k = 0; k < sizeof(Var*); ++k)
                     {
-                        bytecode.push_back(var[k]);
+                        m_bytecode.push_back(var[k]);
                     }
                 }
                 break;
@@ -149,19 +290,19 @@ std::vector<byte> VirtualMachine::GenerateByteCode()
             case Code::Ji:
             {
                 ++i;
-                LexemType lexemType = m_lexems[i].GetLexemType();
+                LexemType lexemType = lexems_[i].GetLexemType();
                 if(lexemType == LexemType::Constant)
                 {
-                    bytecode.push_back(static_cast<char>(code));
-                    size_t numStr = m_lexems[i].GetConstValue();
-                    for(size_t m = 0; i < m_lexems.size(); ++m)
+                    m_bytecode.push_back(static_cast<char>(code));
+                    size_t numStr = lexems_[i].GetConstValue();
+                    for(size_t m = 0; i < lexems_.size(); ++m)
                     {
-                        size_t lexemStr = m_lexems[m].GetStringNumber();
+                        size_t lexemStr = lexems_[m].GetStringNumber();
                         if(lexemStr >= numStr)
                         {
                             for(int k = 64; k > 0; k -= 8)
                             {
-                                bytecode.push_back(numStr >> k);
+                                m_bytecode.push_back(numStr >> k);
                             }
                             break;
                         }
@@ -170,10 +311,9 @@ std::vector<byte> VirtualMachine::GenerateByteCode()
                 break;
             }
             default:
-                bytecode.push_back(static_cast<byte>(code));
+                m_bytecode.push_back(static_cast<byte>(code));
         }
     }
-    return bytecode;
 }
 byte VirtualMachine::getLexemSizeInBytecode(const Lexem& lexem_)
 {
@@ -221,27 +361,29 @@ VirtualMachine::Code VirtualMachine::getLexemCode(const Lexem &lexem_)
         case LexemType::Write: return Code::Write;
         case LexemType::End: return Code::End;
         case LexemType::EndOfFile: return Code::End;
+        case LexemType::Pol: return Code::Pol;
         default: return Code::Empty;
     }
 }
-void VirtualMachine::Run(const std::vector<byte>& bytecode_)
+void VirtualMachine::Run(const std::vector<Lexem>& lexems_)
 {
-    auto begin = const_cast<byte*>(bytecode_.data());
-    for(size_t i = 0; i < bytecode_.size(); ++i)
+    generateByteCode(lexems_);
+    auto begin = const_cast<byte*>(m_bytecode.data());
+    for(size_t i = 0; i < m_bytecode.size(); ++i)
     {
-        Code code = static_cast<Code>(bytecode_[i]);
+        Code code = static_cast<Code>(m_bytecode[i]);
         switch(code)
         {
             case Code::Push:
             {
-                size_t* var = *reinterpret_cast<size_t**>(begin + i + 1);
-                i += sizeof(size_t*);
+                Var* var = *reinterpret_cast<Var**>(begin + i + 1);
+                i += sizeof(Var*);
                 m_stack.push(*var);
                 break;
             }
             case Code::Pop:
             {
-                size_t* var = *reinterpret_cast<size_t**>(begin + i + 1);
+                Var* var = *reinterpret_cast<Var**>(begin + i + 1);
                 i += sizeof(int*);
                 *var = m_stack.top();
                 m_stack.pop();
@@ -249,8 +391,30 @@ void VirtualMachine::Run(const std::vector<byte>& bytecode_)
             }
             case Code::Write:
             {
-                std::cout << m_stack.top() << std::endl;
+                std::cout << m_stack.top();
                 m_stack.pop();
+                break;
+            }
+            case Code::Pol:
+            {
+                Var count = m_stack.top();
+                m_stack.pop();
+                if(count.type == VarType::MyType)
+                    throw 201;
+
+                Polynominal pol;
+                for(size_t i = 0; i < count.dataInt; ++i)
+                {
+                    Var degree = m_stack.top();
+                    m_stack.pop();
+                    Var coeff = m_stack.top();
+                    m_stack.pop();
+                    if(degree.type != VarType::Int || coeff.type != VarType::Int)
+                        throw 500;
+
+                    pol.Push(degree.dataInt, coeff.dataInt);
+                }
+                m_stack.push(Var(VarType::MyType, 0, pol));
                 break;
             }
             case Code::Plus:
@@ -281,28 +445,31 @@ void VirtualMachine::Run(const std::vector<byte>& bytecode_)
             case Code::Jmp:
             {
                 size_t str = *reinterpret_cast<size_t*>(begin + i + 1);
-                i = getOffsetFromBegin(str) - 1;
+                i = getOffsetFromBegin(lexems_, str) - 1;
                 break;
             }
             case Code::Ji:
             {
-                if(m_stack.top() > 0)
+                size_t str = *reinterpret_cast<size_t*>(begin + i + 1);
+                Var& top = m_stack.top();
+                if(top.type != VarType::Int)
+                    throw 100;
+                if(top.dataInt > 0)
                 {
-                    size_t str = *reinterpret_cast<size_t*>(begin + i + 1);
-                    i = getOffsetFromBegin(str) - 1;
+                    i = getOffsetFromBegin(lexems_, str) - 1;
                 }
                 else
                 {
-                    i += sizeof(int*);
+                    i += sizeof(size_t*);
                 }
                 m_stack.pop();
                 break;
             }
             case Code::Read:
             {
-                size_t val;
+                int val;
                 std::cin >> val;
-                m_stack.push(val);
+                m_stack.push(Var(VarType::Int, val, {}));
                 break;
             }
             case Code::Equal:
@@ -337,10 +504,9 @@ void VirtualMachine::Run(const std::vector<byte>& bytecode_)
             }
             case Code::End:
             {
-                i = bytecode_.size();
+                i = m_bytecode.size();
                 break;
             }
         }
     }
 }
-

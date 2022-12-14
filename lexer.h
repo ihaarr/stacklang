@@ -13,13 +13,14 @@ class Lexer final
 private:
     enum State
     {
-        sA1, sA2, sB1, sC1, sD1, sE1, sE2, sE3, sE4, sF1, sF2, sF3, sG1, sH1, sI1, sI2, sJ1, sEND, sM1, sK1, sK2, sK3, sK4, StateCount
+        sA1, sA2, sB1, sC1, sD1, sE1, sE2, sE3, sE4, sF1, sF2, sF3, sG1, sH1, sI1, sI2, sJ1,
+        sEND, sM1, sK1, sK2, sK3, sK4, sP1, sP2, sP3, sP4, sP5, sP6, StateCount
     };
 public:
     using FuncPtr = State (Lexer::*)();
     enum Token
     {
-        Letter, Digit, Op, Relation, Space, NewLine, Semicolon, Error, End, TokenCount
+        Letter, Digit, Op, Relation, Space, NewLine, Semicolon, Error, End, Bracket, Degree, TokenCount
     };
     struct FindTable
     {
@@ -31,8 +32,9 @@ public:
         FuncPtr m_stateFunc;
     };
 public:
-    Lexer(const char* filename_);
+    Lexer();
     const std::vector<Lexem>& GetLexems();
+    void Analyze(const char* filename);
 private:
     void initTable();
     void initFindTable();
@@ -44,9 +46,12 @@ private:
     bool isSemicolon(char);
     bool isNewLine(char);
     bool isEndOfFile(char);
+    bool isSquareOpenBracket(char);
+    bool isSquareCloseBracket(char);
+    bool isSignPlus(char);
     Token getTokenByChar(char ch);
     void addConst();
-    void addVar();
+    void addVar(VarType type_ = VarType::Int);
     void createLexem();
     State error();
     State handleError();
@@ -71,6 +76,16 @@ private:
     State I1();
     State I2();
     State J1();
+    State P0();
+    State P1();
+    State P2();
+    State P3();
+    State P4();
+    State P5();
+    State P6();
+    State P1a();
+    State P2a();
+    State P2b();
     State A1a();
     State A1b();
     State A2a();
@@ -112,9 +127,11 @@ private:
     void readFileText(std::string&& text_);
 private:
     LexemType m_registerClass;
+    VarType m_varType;
     char m_currentChar;
     int m_registerNumber;
     int m_registerFind;
+    int m_registerPolCount;
     char m_registerRelation;
     std::string m_registerVar;
     size_t m_currentNumberStr = 1;

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "lexem.h"
 
-Lexem::Lexem(LexemType lexemType_, size_t strNum, const std::string& varName_, int constValue_, OperationType operationType_, RelationType relationType_)
+Lexem::Lexem(LexemType lexemType_, size_t strNum, const std::string& varName_, VarType varType, int constValue_, OperationType operationType_, RelationType relationType_)
     : m_lexemType(lexemType_), m_stringNumber(strNum), m_varName(varName_), m_constValue(constValue_),
     m_opType(operationType_), m_relationType(relationType_)
 {
@@ -59,6 +59,7 @@ std::string Lexem::ToString() const
         case LexemType::Jmp: return std::string("Lexem: jmp");
         case LexemType::Ji: return std::string("Lexem: ji");
         case LexemType::End: return std::string("Lexem: end");
+        case LexemType::Pol: return std::string("Lexem: pol");
         case LexemType::EndOfFile: return std::string("Lexem: eof");
         default: return std::string("Lexem: error");
     }
@@ -77,9 +78,13 @@ size_t Lexem::GetStringNumber() const
 {
     return m_stringNumber;
 }
-int Lexem::GetConstValue() const
+size_t Lexem::GetConstValue() const
 {
     return m_constValue;
+}
+VarType Lexem::GetVarType() const
+{
+    return m_varType;
 }
 
 

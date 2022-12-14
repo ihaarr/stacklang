@@ -1,37 +1,57 @@
 #ifndef RGR2_VIRTUAL_MACHINE_H
 #define RGR2_VIRTUAL_MACHINE_H
 #include <vector>
-#include <unordered_set>
+#include <list>
 #include <map>
 #include <stack>
 #include <string>
 #include "lexer.h"
+#include "polynominal.h"
 
 using byte = unsigned char;
 class VirtualMachine
 {
 private:
-    enum class VarType
-    {
-        Int, MyType
-    };
     enum class Code : byte
     {
         Empty = 0, Push, Pop, Jmp, Ji, Read, Write, Plus, Minus, Multiply, Div, Mod, Equal, NotEqual, Less, Greater,
-        LessEqual, GreaterEqual, End,
+        LessEqual, GreaterEqual, Pol, End,
     };
     struct Var
     {
+        Var(VarType type_, size_t dataInt_, Polynominal dataPol_) : type(type_), dataInt(dataInt_), dataPol(dataPol_) {}
+        Var() : type(VarType::Int), dataInt(0), dataPol() {}
         VarType type;
-        void* data;
+        size_t dataInt;
+        Polynominal dataPol;
+        friend std::ostream& operator<<(std::ostream& os_, const Var& var_)
+        {
+            switch(var_.type)
+            {
+                case VarType::Int:
+                {
+                    std::cout << var_.dataInt << std::endl;
+                    break;
+                }
+                case VarType::MyType:
+                {
+                    std::cout << var_.dataPol << std::endl;
+                    break;
+                }
+                default:
+                    break;
+            }
+            return os_;
+        }
     };
 public:
-    explicit VirtualMachine(std::vector<Lexem> lexems_);
-    std::vector<byte> GenerateByteCode();
-    void Run(const std::vector<byte>& bytecode_);
+    explicit VirtualMachine();
+    void Run(const std::vector<Lexem>& lexems_);
 private:
+    void generateByteCode(const std::vector<Lexem>& lexems_);
+    std::pair<Var, Var> getTwoVarsFromStack();
     static byte getLexemSizeInBytecode(const Lexem& lexem_);
-    size_t getOffsetFromBegin(size_t str);
+    size_t getOffsetFromBegin(const std::vector<Lexem>& lexems_, size_t str);
     Code getLexemCode(const Lexem& lexem_);
     void div();
     void mod();
@@ -45,10 +65,11 @@ private:
     void lessEqual();
     void greaterEqual();
 private:
-    std::stack<size_t> m_stack;
+    std::stack<Var> m_stack;
     size_t m_currentPosStack;
-    std::unordered_set<size_t> m_constants;
-    std::map<std::string, size_t> m_tableVars;
+    std::list<Var> m_constants;
+    std::map<std::string, Var> m_tableVars;
+    std::vector<byte> m_bytecode;
     std::vector<Lexem> m_lexems;
 };
 
