@@ -2,7 +2,7 @@
 #include <iterator>
 #include "lexer.h"
 
-Lexer::Lexer()
+Lexer::Lexer() : m_lexems()
 {
     initBeginVector();
     initFindTable();
@@ -10,7 +10,7 @@ Lexer::Lexer()
     initRelationTable();
     initOperationTable();
 }
-const std::vector<Lexem> &Lexer::GetLexems()
+std::vector<Lexem> Lexer::GetLexems()
 {
     return m_lexems;
 }
@@ -53,6 +53,7 @@ void Lexer::initTable()
     m_table[sA1][Space] = &Lexer::A1;
     m_table[sA1][NewLine] = &Lexer::A1b;
     m_table[sA1][Semicolon] = &Lexer::I1a;
+    m_table[sA1][End] = &Lexer::A1;
 
     m_table[sA2][Letter] = &Lexer::B1a;
     m_table[sA2][Op] = &Lexer::C1a;
@@ -120,6 +121,7 @@ void Lexer::initTable()
     m_table[sH1][NewLine] = &Lexer::A2d;
     m_table[sH1][Semicolon] = &Lexer::I2c;
     m_table[sH1][End] = &Lexer::Exit4;
+    m_table[sH1][Bracket] = &Lexer::H1;
 
     m_table[sI1][Letter] = &Lexer::I1;
     m_table[sI1][Digit] = &Lexer::I1;
@@ -129,6 +131,8 @@ void Lexer::initTable()
     m_table[sI1][NewLine] = &Lexer::A1a;
     m_table[sI1][Semicolon] = &Lexer::I1;
     m_table[sI1][Error] = &Lexer::I1;
+    m_table[sI1][Degree] = &Lexer::I1;
+    m_table[sI1][End] = &Lexer::I1;
 
     m_table[sI2][Letter] = &Lexer::I2;
     m_table[sI2][Digit] = &Lexer::I2;
@@ -138,6 +142,7 @@ void Lexer::initTable()
     m_table[sI2][NewLine] = &Lexer::A2b;
     m_table[sI2][Semicolon] = &Lexer::I2;
     m_table[sI2][Error] = &Lexer::I2;
+    m_table[sI2][Degree] = &Lexer::I2;
     m_table[sI2][End] = &Lexer::Exit1;
 
     m_table[sJ1][Letter] = &Lexer::J1;
@@ -149,6 +154,8 @@ void Lexer::initTable()
     m_table[sJ1][Semicolon] = &Lexer::J1;
     m_table[sJ1][Error] = &Lexer::J1;
     m_table[sJ1][End] = &Lexer::Exit1;
+    m_table[sJ1][Bracket] = &Lexer::J1;
+    m_table[sJ1][Degree] = &Lexer::J1;
 
     m_table[sK1][Space] = &Lexer::K1;
     m_table[sK1][Letter] = &Lexer::K1;
@@ -167,16 +174,35 @@ void Lexer::initTable()
 
     m_table[sP1][Digit] = &Lexer::P1;
     m_table[sP1][Letter] = &Lexer::P1;
+    m_table[sP1][Space] = &Lexer::P1;
+    m_table[sP1][NewLine] = &Lexer::P1;
+    m_table[sP1][Semicolon] = &Lexer::P1;
+    m_table[sP1][End] = &Lexer::P1;
+    m_table[sP1][Op] = &Lexer::P1;
+    m_table[sP1][Relation] = &Lexer::P1;
+    m_table[sP1][Degree] = &Lexer::P1;
 
     m_table[sP2][Digit] = &Lexer::P2;
     m_table[sP2][Letter] = &Lexer::P2;
 
     m_table[sP3][Digit] = &Lexer::P3;
     m_table[sP3][Letter] = &Lexer::P3;
+    m_table[sP3][Space] = &Lexer::P3;
+    m_table[sP3][NewLine] = &Lexer::P3;
+    m_table[sP3][Semicolon] = &Lexer::P3;
+    m_table[sP3][End] = &Lexer::P3;
+    m_table[sP3][Op] = &Lexer::P3;
+    m_table[sP3][Relation] = &Lexer::P3;
     m_table[sP3][Degree] = &Lexer::P3;
 
     m_table[sP4][Digit] = &Lexer::P4;
     m_table[sP4][Letter] = &Lexer::P4;
+    m_table[sP4][Space] = &Lexer::P4;
+    m_table[sP4][NewLine] = &Lexer::P4;
+    m_table[sP4][Semicolon] = &Lexer::P4;
+    m_table[sP4][End] = &Lexer::P4;
+    m_table[sP4][Op] = &Lexer::P4;
+    m_table[sP4][Relation] = &Lexer::P4;
 
     m_table[sP5][Digit] = &Lexer::P5;
     m_table[sP5][Letter] = &Lexer::P5;
@@ -184,6 +210,36 @@ void Lexer::initTable()
     m_table[sP5][Bracket] = &Lexer::P5;
     m_table[sP5][End] = &Lexer::Exit1;
     m_table[sP5][NewLine] = &Lexer::P5;
+
+    m_table[sV1][Digit] = &Lexer::V1;
+    m_table[sV1][Letter] = &Lexer::V1;
+    m_table[sV1][Space] = &Lexer::V1;
+    m_table[sV1][NewLine] = &Lexer::V1;
+    m_table[sV1][Semicolon] = &Lexer::V1;
+    m_table[sV1][End] = &Lexer::V1;
+    m_table[sV1][Op] = &Lexer::V1;
+    m_table[sV1][Relation] = &Lexer::V1;
+    m_table[sV1][Degree] = &Lexer::V1;
+
+    m_table[sS1][Digit] = &Lexer::S1;
+    m_table[sS1][Letter] = &Lexer::S1;
+    m_table[sS1][Space] = &Lexer::S1;
+    m_table[sS1][NewLine] = &Lexer::S1;
+    m_table[sS1][Semicolon] = &Lexer::S1;
+    m_table[sS1][End] = &Lexer::S1;
+    m_table[sS1][Op] = &Lexer::S1;
+    m_table[sS1][Relation] = &Lexer::S1;
+    m_table[sS1][Degree] = &Lexer::S1;
+
+    m_table[sL1][Digit] = &Lexer::L1;
+    m_table[sL1][Letter] = &Lexer::L1;
+    m_table[sL1][Space] = &Lexer::L1;
+    m_table[sL1][NewLine] = &Lexer::L1;
+    m_table[sL1][Semicolon] = &Lexer::L1;
+    m_table[sL1][End] = &Lexer::L1;
+    m_table[sL1][Op] = &Lexer::L1;
+    m_table[sL1][Relation] = &Lexer::L1;
+    m_table[sL1][Degree] = &Lexer::L1;
 }
 void Lexer::initFindTable()
 {
@@ -206,13 +262,24 @@ void Lexer::initFindTable()
     m_tableFind[16] = FindTable('t', 0, &Lexer::B1b);
     m_tableFind[17] = FindTable('e', 0, &Lexer::C1d);
     m_tableFind[18] = FindTable('l', 0, &Lexer::E4a);
+    m_tableFind[19] = FindTable('a', 0, &Lexer::B1b);
+    m_tableFind[20] = FindTable('l', 0, &Lexer::B1b);
+    m_tableFind[21] = FindTable('u', 0, &Lexer::B1b);
+    m_tableFind[22] = FindTable('e', 0, &Lexer::V1a);
+    m_tableFind[23] = FindTable('e', 0, &Lexer::B1b);
+    m_tableFind[24] = FindTable('r', 25, &Lexer::S1a);
+    m_tableFind[25] = FindTable('g', 0, &Lexer::B1b);
+    m_tableFind[26] = FindTable('r', 0, &Lexer::B1b);
+    m_tableFind[27] = FindTable('e', 0, &Lexer::B1b);
+    m_tableFind[28] = FindTable('e', 0, &Lexer::L1a);
+
 }
 void Lexer::initBeginVector()
 {
     m_beginVector['a'] = 0;
     m_beginVector['b'] = 0;
     m_beginVector['c'] = 0;
-    m_beginVector['d'] = 0;
+    m_beginVector['d'] = 23;
     m_beginVector['f'] = 0;
     m_beginVector['g'] = 0;
     m_beginVector['h'] = 0;
@@ -226,7 +293,7 @@ void Lexer::initBeginVector()
     m_beginVector['s'] = 0;
     m_beginVector['t'] = 0;
     m_beginVector['u'] = 0;
-    m_beginVector['v'] = 0;
+    m_beginVector['v'] = 19;
     m_beginVector['x'] = 0;
     m_beginVector['y'] = 0;
     m_beginVector['z'] = 0;
@@ -362,7 +429,7 @@ bool Lexer::isOp(char ch)
 }
 bool Lexer::isEndOfFile(char ch)
 {
-    return ch == EOF;
+    return ch == EOF || ch == '\0';
 }
 bool Lexer::isSquareOpenBracket(char ch)
 {
@@ -372,9 +439,72 @@ bool Lexer::isSquareCloseBracket(char ch)
 {
     return ch == ']';
 }
-bool Lexer::isSignPlus(char ch)
+bool Lexer::isSign(char ch)
 {
-    return ch == '+';
+    return ch == '+' || ch == '-';
+}
+Lexer::State Lexer::V1()
+{
+    if(isNewLine(m_currentChar))
+    {
+        createLexem();
+        return sA2;
+    }
+    if(isspace(m_currentChar)) return sV1;
+    if(isSemicolon(m_currentChar)) return sI1;
+    if(isEndOfFile(m_currentChar))
+    {
+        createLexem();
+        return Exit1();
+    }
+    return error();
+}
+Lexer::State Lexer::S1()
+{
+    if(isNewLine(m_currentChar))
+    {
+        createLexem();
+        return sA2;
+    }
+    if(isspace(m_currentChar)) return sS1;
+    if(isSemicolon(m_currentChar)) return sI1;
+    if(isEndOfFile(m_currentChar))
+    {
+        createLexem();
+        return Exit1();
+    }
+    return error();
+}
+Lexer::State Lexer::L1()
+{
+    if(isNewLine(m_currentChar))
+    {
+        createLexem();
+        return sA2;
+    }
+    if(isspace(m_currentChar)) return sL1;
+    if(isSemicolon(m_currentChar)) return sI1;
+    if(isEndOfFile(m_currentChar))
+    {
+        createLexem();
+        return Exit1();
+    }
+    return error();
+}
+Lexer::State Lexer::L1a()
+{
+    m_registerClass = LexemType::Degree;
+    return sL1;
+}
+Lexer::State Lexer::V1a()
+{
+    m_registerClass = LexemType::Value;
+    return sV1;
+}
+Lexer::State Lexer::S1a()
+{
+    m_registerClass = LexemType::Derivative;
+    return sS1;
 }
 Lexer::State Lexer::A1()
 {
@@ -559,6 +689,7 @@ Lexer::State Lexer::H1()
 Lexer::State Lexer::I1()
 {
     if(isNewLine(m_currentChar)) return A1a();
+    if(isEndOfFile(m_currentChar)) return sEND;
     return sI1;
 }
 Lexer::State Lexer::I2()
@@ -580,14 +711,22 @@ Lexer::State Lexer::P0()
 }
 Lexer::State Lexer::P1()
 {
-    if(isspace(m_currentChar)) return A2f();
-    if(isalpha(m_currentChar)) return A2f();
+    if(isSign(m_currentChar))
+    {
+        m_registerSign = m_currentChar;
+        return sP1;
+    }
     if(isdigit(m_currentChar)) return P1a();
+    for(size_t i = 0; i < m_registerPolCount; ++i)
+    {
+        m_lexems.pop_back();
+        m_lexems.pop_back();
+    }
+    m_lexems.pop_back();
     return error();
 }
 Lexer::State Lexer::P2()
 {
-    if(isspace(m_currentChar)) return A2f();
     if(isalpha(m_currentChar)) return P2b(); //после коэффициента идет буква
     if(isdigit(m_currentChar)) return P2a();
     return error();
@@ -598,6 +737,8 @@ Lexer::State Lexer::P3() //Встретили х, ждем ^
     {
         return sP4;
     }
+    m_lexems.pop_back();
+    m_lexems.pop_back();
     return error();
 }
 Lexer::State Lexer::P4() //Встретили ^, начинаем читать степень, если цифра
@@ -608,6 +749,8 @@ Lexer::State Lexer::P4() //Встретили ^, начинаем читать �
         m_registerNumber = m_currentChar - '0';
         return sP5;
     }
+    m_lexems.pop_back();
+    m_lexems.pop_back();
     return error();
 }
 Lexer::State Lexer::P5() //Продолжаем читать степень.
@@ -633,13 +776,14 @@ Lexer::State Lexer::P5() //Продолжаем читать степень.
         m_registerNumber = m_registerNumber * 10 + (m_currentChar - '0');
         return sP5;
     }
-    if(isSignPlus(m_currentChar))
+    if(isSign(m_currentChar))
     {
         ++m_registerPolCount;
         createLexem();
         addConst();
         createLexem();
         m_registerClass = LexemType::Push;
+        m_registerSign = m_currentChar;
         createLexem();
         return sP1;
     }
@@ -659,11 +803,14 @@ Lexer::State Lexer::P2b()
 {
     if(m_currentChar == 'x')
     {
+        if(m_registerSign == '-')
+            m_registerNumber *= -1;
         addConst();
         createLexem();
         m_registerClass = LexemType::Push;
         return sP3;
     }
+    m_lexems.pop_back();
     return error();
 }
 Lexer::State Lexer::A1a()

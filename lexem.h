@@ -10,7 +10,7 @@ enum class VarType
 };
 enum class LexemType
 {
-    Constant, Var, Push, Pop, Op, Relation, Jmp, Ji, Read, Write, End, Comment, Error, Pol, EndOfFile
+    Constant, Var, Push, Pop, Op, Relation, Jmp, Ji, Read, Write, End, Comment, Error, Pol, Value, Derivative, Degree, EndOfFile
 };
 enum class OperationType
 {
@@ -42,7 +42,7 @@ private:
     VarType m_varType;
     size_t m_stringNumber;
     std::string m_varName;
-    size_t m_constValue;
+    ssize_t m_constValue;
     OperationType m_opType;
     RelationType m_relationType;
 };

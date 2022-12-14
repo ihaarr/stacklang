@@ -15,14 +15,14 @@ private:
     enum class Code : byte
     {
         Empty = 0, Push, Pop, Jmp, Ji, Read, Write, Plus, Minus, Multiply, Div, Mod, Equal, NotEqual, Less, Greater,
-        LessEqual, GreaterEqual, Pol, End,
+        LessEqual, GreaterEqual, Pol, End, ValueFunc, DerivativeFunc, DegreeFunc
     };
     struct Var
     {
-        Var(VarType type_, size_t dataInt_, Polynominal dataPol_) : type(type_), dataInt(dataInt_), dataPol(dataPol_) {}
+        Var(VarType type_, ssize_t dataInt_, Polynominal dataPol_) : type(type_), dataInt(dataInt_), dataPol(dataPol_) {}
         Var() : type(VarType::Int), dataInt(0), dataPol() {}
         VarType type;
-        size_t dataInt;
+        ssize_t dataInt;
         Polynominal dataPol;
         friend std::ostream& operator<<(std::ostream& os_, const Var& var_)
         {

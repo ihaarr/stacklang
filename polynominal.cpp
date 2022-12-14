@@ -81,7 +81,10 @@ Polynominal Polynominal::Derivative() const
     Monominal* current = tail;
     for(int i = 0; i < size; ++i)
     {
-        ret.Push(current->coeff - 1, current->coeff * current->degree);
+        if(current->degree != 0)
+        {
+            ret.Push(current->degree - 1, current->coeff * current->degree);
+        }
         current = current->next;
     }
     return ret;

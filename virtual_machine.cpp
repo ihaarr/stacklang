@@ -362,6 +362,9 @@ VirtualMachine::Code VirtualMachine::getLexemCode(const Lexem &lexem_)
         case LexemType::End: return Code::End;
         case LexemType::EndOfFile: return Code::End;
         case LexemType::Pol: return Code::Pol;
+        case LexemType::Value: return Code::ValueFunc;
+        case LexemType::Derivative: return Code::DerivativeFunc;
+        case LexemType::Degree: return Code::DegreeFunc;
         default: return Code::Empty;
     }
 }
@@ -374,6 +377,16 @@ void VirtualMachine::Run(const std::vector<Lexem>& lexems_)
         Code code = static_cast<Code>(m_bytecode[i]);
         switch(code)
         {
+            case Code::DegreeFunc:
+            {
+                Var pol = m_stack.top();
+                if(pol.type != VarType::MyType)
+                    throw 100;
+
+                m_stack.pop();
+                m_stack.push(Var(VarType::Int, pol.dataPol.MaxDegree(), {}));
+                break;
+            }
             case Code::Push:
             {
                 Var* var = *reinterpret_cast<Var**>(begin + i + 1);
@@ -417,6 +430,29 @@ void VirtualMachine::Run(const std::vector<Lexem>& lexems_)
                 m_stack.push(Var(VarType::MyType, 0, pol));
                 break;
             }
+            case Code::ValueFunc:
+            {
+                Var x = m_stack.top();
+                if(x.type != VarType::Int)
+                    throw 100;
+                m_stack.pop();
+                Var pol = m_stack.top();
+                if(pol.type != VarType::MyType)
+                    throw 100;
+
+                m_stack.pop();
+                m_stack.push(Var(VarType::Int, pol.dataPol.GetValue(x.dataInt), {}));
+                break;
+            }
+            case Code::DerivativeFunc:
+            {
+                Var pol = m_stack.top();
+                if(pol.type != VarType::MyType)
+                    throw 100;
+
+                m_stack.push(Var(VarType::MyType, 0, pol.dataPol.Derivative()));
+                break;
+            }
             case Code::Plus:
             {
                 plus();
@@ -451,7 +487,7 @@ void VirtualMachine::Run(const std::vector<Lexem>& lexems_)
             case Code::Ji:
             {
                 size_t str = *reinterpret_cast<size_t*>(begin + i + 1);
-                Var& top = m_stack.top();
+                Var top = m_stack.top();
                 if(top.type != VarType::Int)
                     throw 100;
                 if(top.dataInt > 0)
@@ -507,6 +543,8 @@ void VirtualMachine::Run(const std::vector<Lexem>& lexems_)
                 i = m_bytecode.size();
                 break;
             }
+            default:
+                break;
         }
     }
 }

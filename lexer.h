@@ -14,13 +14,14 @@ private:
     enum State
     {
         sA1, sA2, sB1, sC1, sD1, sE1, sE2, sE3, sE4, sF1, sF2, sF3, sG1, sH1, sI1, sI2, sJ1,
-        sEND, sM1, sK1, sK2, sK3, sK4, sP1, sP2, sP3, sP4, sP5, sP6, StateCount
+        sEND, sM1, sK1, sK2, sK3, sK4, sP1, sP2, sP3, sP4, sP5, sV1, sS1, sL1, StateCount
     };
 public:
     using FuncPtr = State (Lexer::*)();
     enum Token
     {
-        Letter, Digit, Op, Relation, Space, NewLine, Semicolon, Error, End, Bracket, Degree, TokenCount
+        Letter, Digit, Op, Relation, Space, NewLine, Semicolon, Error,
+        End, Bracket, Degree, ValueFunc, DerivativeFunc, DegreeFunc, TokenCount
     };
     struct FindTable
     {
@@ -33,7 +34,7 @@ public:
     };
 public:
     Lexer();
-    const std::vector<Lexem>& GetLexems();
+    std::vector<Lexem> GetLexems();
     void Analyze(const char* filename);
 private:
     void initTable();
@@ -48,13 +49,18 @@ private:
     bool isEndOfFile(char);
     bool isSquareOpenBracket(char);
     bool isSquareCloseBracket(char);
-    bool isSignPlus(char);
+    bool isSign(char);
     Token getTokenByChar(char ch);
     void addConst();
     void addVar(VarType type_ = VarType::Int);
     void createLexem();
     State error();
     State handleError();
+    State L1a();
+    State L1();
+    State S1a();
+    State S1();
+    State V1();
     State A1();
     State A2();
     State B1();
@@ -82,7 +88,7 @@ private:
     State P3();
     State P4();
     State P5();
-    State P6();
+    State V1a();
     State P1a();
     State P2a();
     State P2b();
@@ -128,10 +134,11 @@ private:
 private:
     LexemType m_registerClass;
     VarType m_varType;
+    char m_registerSign;
     char m_currentChar;
     int m_registerNumber;
     int m_registerFind;
-    int m_registerPolCount;
+    int m_registerPolCount = 1;
     char m_registerRelation;
     std::string m_registerVar;
     size_t m_currentNumberStr = 1;
@@ -141,7 +148,6 @@ private:
     std::map<int, FindTable> m_tableFind;
     std::map<char, std::map<char, RelationType>> m_relationTable;
     std::vector<Lexem> m_lexems;
-    std::vector<char> m_bytecode;
     FuncPtr m_table[StateCount][TokenCount];
 };
 

@@ -61,6 +61,9 @@ std::string Lexem::ToString() const
         case LexemType::End: return std::string("Lexem: end");
         case LexemType::Pol: return std::string("Lexem: pol");
         case LexemType::EndOfFile: return std::string("Lexem: eof");
+        case LexemType::Value: return std::string("Lexem: value func");
+        case LexemType::Derivative: return std::string("Lexem: derivative func");
+        case LexemType::Degree: return std::string("Lexem: degree func");
         default: return std::string("Lexem: error");
     }
 }
