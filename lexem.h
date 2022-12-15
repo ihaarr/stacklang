@@ -10,7 +10,8 @@ enum class VarType
 };
 enum class LexemType
 {
-    Constant, Var, Push, Pop, Op, Relation, Jmp, Ji, Read, Write, End, Comment, Error, Pol, Value, Derivative, Degree, EndOfFile
+    Constant, Var, Push, Pop, Op, Relation, Jmp, Ji, Read, Write, End, Comment, Error,
+    Pol, Value, Derivative, Degree, Get, Set, EndOfFile
 };
 enum class OperationType
 {

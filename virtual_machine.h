@@ -15,7 +15,7 @@ private:
     enum class Code : byte
     {
         Empty = 0, Push, Pop, Jmp, Ji, Read, Write, Plus, Minus, Multiply, Div, Mod, Equal, NotEqual, Less, Greater,
-        LessEqual, GreaterEqual, Pol, End, ValueFunc, DerivativeFunc, DegreeFunc
+        LessEqual, GreaterEqual, Pol, End, ValueFunc, DerivativeFunc, DegreeFunc, SetFunc, GetFunc
     };
     struct Var
     {

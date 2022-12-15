@@ -91,7 +91,10 @@ Polynominal Polynominal::Derivative() const
 }
 std::ostream& operator<<(std::ostream& os_, const Polynominal::Monominal& obj_)
 {
-    if(obj_.coeff >= 0)
+    if(obj_.coeff == 0)
+        return os_;
+
+    if(obj_.coeff > 0)
         os_ << '+';
 
     os_ << obj_.coeff << "x^" << obj_.degree;
@@ -106,7 +109,7 @@ std::ostream& operator<<(std::ostream& os_, const Polynominal& obj_)
     else
     {
         os_ << '[';
-        for(uint i = 0; i <= obj_.MaxDegree(); ++i)
+        for(int i = obj_.MaxDegree(); i >= 0; --i)
         {
             Polynominal::Iterator it = obj_.find(i);
             if(it != obj_.end())
@@ -264,7 +267,7 @@ Polynominal Polynominal::operator/(const Polynominal& other) const
     if(size < other.size || MaxDegree() < other.MaxDegree())
         return Polynominal();
 
-    Polynominal ret, temp(*this), m, m2;
+    Polynominal ret, temp(*this), m, remainder;
     uint maxDegreeTemp = temp.MaxDegree();
     uint maxDegreeOther = other.MaxDegree();
     for(uint i = 0; i < temp.MaxDegree(); ++i)
@@ -275,20 +278,15 @@ Polynominal Polynominal::operator/(const Polynominal& other) const
         }
     }
 
-    m.Push(maxDegreeTemp, temp[maxDegreeTemp]);
-    m.Push(maxDegreeTemp - 1, temp[maxDegreeTemp - 1]);
-    ret.Push(maxDegreeTemp - maxDegreeOther, m[maxDegreeTemp] / other[maxDegreeOther]);
-    m2.Push(maxDegreeTemp - maxDegreeOther, m[maxDegreeTemp] / other[maxDegreeOther]);
-    --maxDegreeTemp;
-    auto k = m2 * other;
-    m = m - k;
-    ret.Push(maxDegreeTemp - maxDegreeOther, m[maxDegreeTemp] / other[maxDegreeOther]);
-    m2 = Polynominal();
-    m2.Push(maxDegreeTemp - maxDegreeOther, m[maxDegreeTemp] / other[maxDegreeOther]);
-    m.Push(maxDegreeTemp - 1, temp[maxDegreeTemp - 1]);
-    --maxDegreeTemp;
-    auto s = m2 * other;
-    m = m - s;
+    while(maxDegreeTemp >= maxDegreeOther)
+    {
+        double coeff = temp[maxDegreeTemp] / other[maxDegreeOther];
+        ret.Push(maxDegreeTemp - maxDegreeOther, coeff);
+        remainder = Polynominal();
+        remainder.Push(maxDegreeTemp - maxDegreeOther, coeff);
+        temp = temp - remainder * other;
+        --maxDegreeTemp;
+    }
     return ret;
 }
 Polynominal &Polynominal::operator=(const Polynominal &other)
@@ -302,7 +300,30 @@ Polynominal &Polynominal::operator=(const Polynominal &other)
 }
 Polynominal Polynominal::operator%(const Polynominal &other) const
 {
-    return Polynominal();
+    if(size < other.size || MaxDegree() < other.MaxDegree())
+        return Polynominal();
+
+    Polynominal ret, temp(*this), remainder;
+    uint maxDegreeTemp = temp.MaxDegree();
+    uint maxDegreeOther = other.MaxDegree();
+    for(uint i = 0; i < temp.MaxDegree(); ++i)
+    {
+        if(temp.find(i) == temp.end())
+        {
+            temp.Push(i, 0);
+        }
+    }
+
+    while(maxDegreeTemp >= maxDegreeOther)
+    {
+        double coeff = temp[maxDegreeTemp] / other[maxDegreeOther];
+        ret.Push(maxDegreeTemp - maxDegreeOther, coeff);
+        remainder = Polynominal();
+        remainder.Push(maxDegreeTemp - maxDegreeOther, coeff);
+        temp = temp - remainder * other;
+        --maxDegreeTemp;
+    }
+    return temp;
 }
 std::istream &operator>>(std::istream &in, Polynominal &obj)
 {

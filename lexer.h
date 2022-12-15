@@ -14,14 +14,14 @@ private:
     enum State
     {
         sA1, sA2, sB1, sC1, sD1, sE1, sE2, sE3, sE4, sF1, sF2, sF3, sG1, sH1, sI1, sI2, sJ1,
-        sEND, sM1, sK1, sK2, sK3, sK4, sP1, sP2, sP3, sP4, sP5, sV1, sS1, sL1, StateCount
+        sEND, sM1, sK1, sK2, sK3, sK4, sP1, sP2, sP3, sP4, sP5, sV1, sS1, sL1, sZ1, sZ2, StateCount
     };
 public:
     using FuncPtr = State (Lexer::*)();
     enum Token
     {
-        Letter, Digit, Op, Relation, Space, NewLine, Semicolon, Error,
-        End, Bracket, Degree, ValueFunc, DerivativeFunc, DegreeFunc, TokenCount
+        Letter, Digit, Op, Relation, Space, NewLine, Semicolon,
+        End, Bracket, Degree, ValueFunc, DerivativeFunc, DegreeFunc, GetFunc, SetFunc, Error, TokenCount
     };
     struct FindTable
     {
@@ -56,6 +56,10 @@ private:
     void createLexem();
     State error();
     State handleError();
+    State Z2();
+    State Z2a();
+    State Z1();
+    State Z1a();
     State L1a();
     State L1();
     State S1a();

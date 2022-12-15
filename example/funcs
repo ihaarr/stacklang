@@ -11,3 +11,14 @@ push [5x^2-4x^1+1x^0]
 push 2
 value
 write
+;Get
+push [5x^15-4x^1+1x^0]
+push 15
+get
+write
+;Set
+push [5x^15-4x^1+1x^0]
+push 15
+push 225
+set
+write

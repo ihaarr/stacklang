@@ -365,6 +365,8 @@ VirtualMachine::Code VirtualMachine::getLexemCode(const Lexem &lexem_)
         case LexemType::Value: return Code::ValueFunc;
         case LexemType::Derivative: return Code::DerivativeFunc;
         case LexemType::Degree: return Code::DegreeFunc;
+        case LexemType::Get: return Code::GetFunc;
+        case LexemType::Set: return Code::SetFunc;
         default: return Code::Empty;
     }
 }
@@ -377,6 +379,42 @@ void VirtualMachine::Run(const std::vector<Lexem>& lexems_)
         Code code = static_cast<Code>(m_bytecode[i]);
         switch(code)
         {
+            case Code::GetFunc:
+            {
+                Var index = m_stack.top();
+                m_stack.pop();
+                if(index.type != VarType::Int)
+                    throw 100;
+
+                Var pol = m_stack.top();
+                m_stack.pop();
+                if(pol.type != VarType::MyType)
+                    throw 100;
+
+                m_stack.push(Var(VarType::Int, pol.dataPol[index.dataInt], {}));
+                break;
+            }
+            case Code::SetFunc:
+            {
+                Var coeff = m_stack.top();
+                m_stack.pop();
+                if(coeff.type != VarType::Int)
+                    throw 100;
+
+                Var index = m_stack.top();
+                m_stack.pop();
+                if(index.type != VarType::Int)
+                    throw 100;
+
+                Var pol = m_stack.top();
+                m_stack.pop();
+                if(pol.type != VarType::MyType)
+                    throw 100;
+
+                pol.dataPol[index.dataInt] = coeff.dataInt;
+                m_stack.push(pol);
+                break;
+            }
             case Code::DegreeFunc:
             {
                 Var pol = m_stack.top();

@@ -64,6 +64,8 @@ std::string Lexem::ToString() const
         case LexemType::Value: return std::string("Lexem: value func");
         case LexemType::Derivative: return std::string("Lexem: derivative func");
         case LexemType::Degree: return std::string("Lexem: degree func");
+        case LexemType::Get: return std::string("Lexem: get func");
+        case LexemType::Set: return std::string("Lexel: set func");
         default: return std::string("Lexem: error");
     }
 }
